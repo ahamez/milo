@@ -89,7 +89,7 @@ module.exports = class CSVWriter {
 				channel6: channelData[5],
 				channel7: channelData[6],
 				channel8: channelData[7],
-				direction: this.direction,
+				direction: this.motorImageryDirection,
 			};
 
 			this.timeSamples.push(timeSampleToPush);
