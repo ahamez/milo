@@ -4,7 +4,7 @@ module.exports = class Dataer {
         this.FFT_WINDOW_LENGTH = 5; // we send the fft once for every n packets we get, can tune according to the resolution and time length you want to see
         this.fftChannel1Counter = 0;
         this.fftChannel2Counter = 0;
-        
+
         this.numSamplesReceivedForSampleRate = 0;
         this.lastSampleRateSendTime = this.top.getTime();
         this.SAMPLE_RATE_POLL_FREQUENCY = 1000; // ms

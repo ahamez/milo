@@ -48,7 +48,7 @@ def predict(ch):
     global last_change
     global prev_predictions
     global prev_states
-    
+
     last_change = min(100, last_change + 1) # increment the distance (in num predictions) away from the last state change
     # the min function is there in case there's overflow
     ch = np.array(ch).T
@@ -57,7 +57,7 @@ def predict(ch):
                                    window=mlab.window_hanning,
                                    Fs=250,
                                    noverlap=0
-                                   ) 
+                                   )
     psd2, freqs = mlab.psd(np.squeeze(ch[7]),
                                    NFFT=500,
                                    window=mlab.window_hanning,
@@ -72,17 +72,17 @@ def predict(ch):
     blink_psd = psd1[blink_index].mean() + psd2[blink_index].mean()
     indices = np.where(np.logical_and(freqs>=15, freqs<=45))
     high_psd = psd1[indices].mean() + psd2[indices].mean()
-    
+
     x_indices = np.where(np.logical_and(freqs>= 5, freqs <= 20))
     psd_ = psd1[x_indices]
     freqs_ = freqs[x_indices]
     peak = freqs_[np.argmax(psd_)]
-    
-    
-    
+
+
+
     """ End """
-    
-    
+
+
     """ compute the brain state and stateful counters here """
     if (high_psd > 50):
         state = 'blink'
@@ -90,15 +90,15 @@ def predict(ch):
         state = 'soft_artifact'
     else:
         state = 'clear'
-            
+
     if (state == 'blink'):  # if we have a blink
         num_blinks += 1
     else:
         num_blinks = 0      # reset num consecutive blinks to 0
-    
+
     #print(peak, high_psd, state)
     print(high_psd, state, wheelchair_state)
-    
+
     """ now use the brain state and wheelchair state to make decisions """
     if wheelchair_state == "stop" or wheelchair_state == "forward":
         if last_change > change_threshold:      # we don't want the wheelchair to switch back immediately if there's residual blinks
@@ -106,7 +106,7 @@ def predict(ch):
                 print('BLINK')
                 num_blinks = 0
                 return 'BLINK'
-    
+
     if wheelchair_state == "intermediate":
         prev_states.append(state)
         if prev_states.count('blink') >= blink_threshold:
@@ -137,7 +137,7 @@ def predict(ch):
             mu2 = psd2[mu_indices].mean()
             l, r = list(clf.predict_proba(np.array([mu1,mu2]).reshape(1,-1))[0])
             prev_predictions.append(l)  # append prediction for voting
-            
+
     return None, l, r
 
     #print("{:2.1f}, {:2.1f}".format(mean_psd, blink_psd/mean_psd))

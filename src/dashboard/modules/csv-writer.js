@@ -15,7 +15,7 @@ module.exports = class CSVWriter {
 			{id: 'channel7', title: 'CHANNEL 7'},
 			{id: 'channel8', title: 'CHANNEL 8'},
 			{id: 'direction', title: 'STATE'}];
-        
+
 		// Setting up array for actually storing the time data where each index has
 		// the header data (time, channels 1-8)
 		this.timeHeaderToWrite = {
@@ -31,7 +31,7 @@ module.exports = class CSVWriter {
 			direction: 'Direction',
 		};
 		this.csvTimeWriter = null;
-        
+
 		this.timeSamples = [this.timeHeaderToWrite];
 		this.activeSensors = [];
 		this.motorImageryDirection = 'none';
@@ -43,7 +43,7 @@ module.exports = class CSVWriter {
 		let day = date.getFullYear() + '-' + (date.getMonth()+1) + '-' +
                        date.getDate() + '-' + date.getHours() + '-' +
                        date.getMinutes() + '-' + date.getSeconds();
-    
+
 		this.csvTimeWriter = this.createCSVWriter({
 			path: __dirname + '/../data/' + trialName + '-'
                               + day + '.csv',
@@ -52,7 +52,7 @@ module.exports = class CSVWriter {
 			append: true
 		});
 	}
-    
+
 	setActiveSensors(activeSensors) {
 		this.activeSensors = activeSensors;
 	}
@@ -78,7 +78,7 @@ module.exports = class CSVWriter {
 				channelData.push(null);
 			}
 		}
-    
+
 		if (type == 'time') {
 			let timeSampleToPush = {time: new Date().getTime(),
 				channel1: channelData[0],
@@ -111,7 +111,7 @@ module.exports = class CSVWriter {
 		else {
 			console.log('User terminated trial. No data saved.');
 		}
-    
+
 		// Both global variables are reset
 		this.timeSamples = [];
 	}
