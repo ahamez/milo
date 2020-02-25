@@ -17,7 +17,7 @@ module.exports = class Production {
     }
     turnOn() {
         this.top.getSocketer().initializeSelfDriving();
-        
+
         // request data every 400 ms
         this.collectionTimer = setInterval(() => {
             let currentTime = this.top.getTime();
@@ -31,7 +31,7 @@ module.exports = class Production {
         // nop
         clearInterval(this.collectionTimer)
     }
-    receiveTimeSeriesData() {
+    receiveTimeSeriesData(data) {
         this.toSendToML.push(data.slice(1));
         if (this.toSendToML.length >= this.SAMPLES_TO_SEND_TO_ML){
             this.top.getSocketer().sendTimeSeriesToML(this.toSendToML);
@@ -103,68 +103,68 @@ module.exports = class Production {
 		this.top.getSocketer().sendStateToML(state);
     }
     updateFromML(data) {
-        if (data.response != null) {
-			console.log(data);
-		}
-    
-		if (this.state == 'stop') {
-			if (data['response'] == 'BLINK') {
-				// go forward
-				if (this.canGo.forward == 1) {
-					this.top.getSocketer().sendMessageToWheelchair('F');
-					this.setState('forward');
-				}
-				else {
-					console.log('CAN\'T GO FORWARD');
-				}
-			}
-		} else if (this.state == 'forward') {
-			if (data['response'] == 'BLINK') {
-				// stop
-				this.top.getSocketer().sendMessageToWheelchair('S');
-				this.setState('intermediate');
-			}
-		} else if (this.state == 'intermediate') {
-			if (data['response'] == 'BLINK') {
-				this.setState('stop');
-			} else if (data['response'] == 'L') {
-				if (this.canGo.left == 1) {
-					this.top.getSocketer().sendMessageToWheelchair('L');
-					this.setState('turning-' + data['response']);
-					setTimeout(function(){
-						if (this.canGo.forward == 1) {
-							this.setState('forward');
-							this.top.getSocketer().sendStateToML(state);
-							this.top.getSocketer().sendMessageToWheelchair('F');
-						}
-						else {
-							this.setState('stop');
-							this.top.getSocketer().sendStateToML(state);
-							this.top.getSocketer().sendMessageToWheelchair('S');
-						}
-					}, this.TURN_TIME);
-				}
-			} else if (data['response'] == 'R') {
-				if (this.canGo.right == 1) {
-                    this.top.getSocketer().sendMessageToWheelchair('R');
-					this.setState('turning-' + data['response']);
-					setTimeout(function(){
-						if (this.canGo.forward == 1) {
-							this.setState('forward');
-							this.top.getSocketer().sendStateToML(state);
-							this.top.getSocketer().sendMessageToWheelchair('F');
-						}
-						else {
-							this.setState('stop');
-							this.top.getSocketer().sendStateToML(state);
-							this.top.getSocketer().sendMessageToWheelchair('S');
-						}
-					}, this.TURN_TIME);
-				}
-			}
-		}
-		this.top.getSocketer().sendStateToML(state);
-		this.top.getSocketer().sendDataForMLVisualization(data);
-		console.log(data['response']);
+      if (data.response != null) {
+			 console.log(data);
+		  }
+
+		  if (this.state == 'stop') {
+		  	if (data['response'] == 'BLINK') {
+		  		// go forward
+		  		if (this.canGo.forward == 1) {
+		  			this.top.getSocketer().sendMessageToWheelchair('F');
+		  			this.setState('forward');
+		  		}
+		  		else {
+		  			console.log('CAN\'T GO FORWARD');
+		  		}
+		  	}
+		  } else if (this.state == 'forward') {
+		  	if (data['response'] == 'BLINK') {
+		  		// stop
+		  		this.top.getSocketer().sendMessageToWheelchair('S');
+		  		this.setState('intermediate');
+		  	}
+		  } else if (this.state == 'intermediate') {
+		  	if (data['response'] == 'BLINK') {
+		  		this.setState('stop');
+		  	} else if (data['response'] == 'L') {
+		  		if (this.canGo.left == 1) {
+		  			this.top.getSocketer().sendMessageToWheelchair('L');
+		  			this.setState('turning-' + data['response']);
+		  			setTimeout(function(){
+		  				if (this.canGo.forward == 1) {
+		  					this.setState('forward');
+		  					this.top.getSocketer().sendStateToML(this.state);
+		  					this.top.getSocketer().sendMessageToWheelchair('F');
+		  				}
+		  				else {
+		  					this.setState('stop');
+		  					this.top.getSocketer().sendStateToML(this.state);
+		  					this.top.getSocketer().sendMessageToWheelchair('S');
+		  				}
+		  			}, this.TURN_TIME);
+		  		}
+		  	} else if (data['response'] == 'R') {
+		  		if (this.canGo.right == 1) {
+                      this.top.getSocketer().sendMessageToWheelchair('R');
+		  			this.setState('turning-' + data['response']);
+		  			setTimeout(function(){
+		  				if (this.canGo.forward == 1) {
+		  					this.setState('forward');
+		  					this.top.getSocketer().sendStateToML(this.state);
+		  					this.top.getSocketer().sendMessageToWheelchair('F');
+		  				}
+		  				else {
+		  					this.setState('stop');
+		  					this.top.getSocketer().sendStateToML(this.state);
+		  					this.top.getSocketer().sendMessageToWheelchair('S');
+		  				}
+		  			}, this.TURN_TIME);
+		  		}
+		  	}
+		  }
+		  this.top.getSocketer().sendStateToML(this.state);
+		  this.top.getSocketer().sendDataForMLVisualization(data);
+		  console.log(data['response']);
     }
 }

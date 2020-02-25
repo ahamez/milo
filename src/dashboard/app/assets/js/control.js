@@ -26,7 +26,7 @@ $(document).ready(function() {
           $('#sampleRate').css('border-color', 'grey');
       }
       $('#sampleRate').html(data['sample rate'] + " hz");
-      console.log('SAMPLE RATE RECEIVED OF : ' + data['sample rate']);
+      // console.log('SAMPLE RATE RECEIVED OF : ' + data['sample rate']);
     });
   var oldClass = "L"
 socket.on('to robotics', function(data){

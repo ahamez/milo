@@ -20,7 +20,7 @@ module.exports = class Top {
         this.training = new Training(this);
         this.dataer = new Dataer(this);
         this.production = new Production(this);
-        
+
         this.setMode('training');
         this.setUpExpressApp();
 
