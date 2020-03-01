@@ -5,12 +5,23 @@ import pickle
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from scipy.signal import butter, lfilter, find_peaks, peak_widths,iirfilter, detrend,correlate,periodogram,welch
 import random
+import sys
 
 sio = socketio.Client()
 
+
 buffer_data = []
-with open('model.pkl', 'rb') as fid:
+
+if len(sys.argv) == 1:
+    print("Missing model")
+    sys.exit(1)
+
+model = sys.argv[1]
+print("Will use model {}", model)
+
+with open(model, 'rb') as fid:
     clf = pickle.load(fid)
+
 print("STARTING")
 
 wheelchair_state = "stop"
