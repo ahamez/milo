@@ -29,6 +29,8 @@ import numpy as np
 from scipy import stats
 from scipy import signal
 
+import pickle
+
 import sys
 sys.path.append('../utils')
 from metadata import MARKER_DATA, LABELS, FILES_BY_SUBJECT, ALL_FILES, ELECTRODE_C3, ELECTRODE_C4
@@ -128,7 +130,7 @@ def extract_features(all_data, window_s, shift, plot_psd=False, separate_trials=
                 psd_c3, psd_c4 = psds_per_channel[0] , psds_per_channel[-1]
                 all_psds[direction].append([psd_c3, psd_c4])
                 trial_features.append(features)
-                
+
                 # Sanity check: plot the psd
                 if plot_psd:
                     plt.figure("psd")
@@ -168,27 +170,27 @@ def normalize(features_dict):
     for direction, features in features_dict.items():
         features = [np.divide(example, mean_coeff) for example in features]
         features_dict[direction] = features
-    
+
 def running_mean(x, N):
-   cumsum = np.cumsum(np.insert(x, 0, 0)) 
+   cumsum = np.cumsum(np.insert(x, 0, 0))
    return (cumsum[N:] - cumsum[:-N]) / N
 
 
 def evaluate_models(X, Y, X_test, Y_test, models):
     """ Evaluate test accuracy of all models in a list of models
-    
+
     Args:
         X : array of features (train)
         Y : array of labels (train)
         X_test : array of features (test)
         Y_test : array of labels (test)
         models : list of (name, model) tuples
-    
+
     Returns:
         val_results : array of accuracies, shape num_models
     """
     test_results = []
-    for name, model in models:
+    for name, model in models.items():
         model.fit(X, Y)
         score = model.score(X_test, Y_test)
         test_results.append(score)
@@ -199,7 +201,7 @@ def evaluate_models(X, Y, X_test, Y_test, models):
 
 def evaluate_models_crossval(X, Y, models, scoring, random_state, n_splits=10):
     """ Evaluate cross-validation accuracy of all models in a list of models
-    
+
     Args:
         X : array of features
         Y : array of labels
@@ -207,12 +209,12 @@ def evaluate_models_crossval(X, Y, models, scoring, random_state, n_splits=10):
         scoring : string, scoring metric
         random_state : seed to use for shuffling
         n_splits : number of folds
-    
+
     Returns:
         val_results : array of accuracies, shape num_models x n_splits
     """
     val_results = []
-    for name, model in models:
+    for name, model in models.items():
         kfold = model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
         cv_results = model_selection.cross_val_score(model, X_test, Y_test, cv=kfold, scoring=scoring)
         val_results.append(cv_results)
@@ -223,10 +225,10 @@ def evaluate_models_crossval(X, Y, models, scoring, random_state, n_splits=10):
 
 def get_features(arr, channels=[ELECTRODE_C3, ELECTRODE_C4], scale_by=None):
     """ Get features from single window of EEG data
-    
+
     Args:
         arr : data of shape num_channels x timepoints
-    
+
     Returns:
         features : array with feature values
         freqs : array of frequencies in Hz
@@ -243,7 +245,7 @@ def get_features(arr, channels=[ELECTRODE_C3, ELECTRODE_C4], scale_by=None):
         psds_per_channel.append(psd)
     psds_per_channel = np.array(psds_per_channel)
     mu_indices = np.where(np.logical_and(freqs >= 10, freqs <= 12))
-    
+
     #features = np.amax(psds_per_channel[:,mu_indices], axis=-1).flatten()   # max of 10-12hz as feature
     features = np.mean(psds_per_channel[:, mu_indices], axis=-1).flatten()   # mean of 10-12hz as feature
     if scale_by:
@@ -264,11 +266,11 @@ if __name__ == "__main__":
     normalize_spectra = True
     run_pca = False
     scale_by = None
-    
+
     # Load data
     dataset = file_utils.load_all()
     subjects = [i for i in range(len(FILES_BY_SUBJECT))]             # index of the test files we want to use
-    
+
     all_val_results = []
     all_test_results = []
 
@@ -277,30 +279,30 @@ if __name__ == "__main__":
     validation = True
     test = False
     seed = 7
-    models = []
-    models.append(('LR', LogisticRegression(solver='lbfgs')))
-    models.append(('LDA', LinearDiscriminantAnalysis()))
-    models.append(('KNN', KNeighborsClassifier()))
-    models.append(('CART', DecisionTreeClassifier()))
-    models.append(('NB', GaussianNB(var_smoothing=0.001)))
-    models.append(('SVM', SVC(gamma='scale')))
-    
+    models = {}
+    # models.append(('LR', LogisticRegression(solver='lbfgs')))
+    models['LDA'] = LinearDiscriminantAnalysis()
+    # models.append(('KNN', KNeighborsClassifier()))
+    # models.append(('CART', DecisionTreeClassifier()))
+    # models.append(('NB', GaussianNB(var_smoothing=0.001)))
+    # models.append(('SVM', SVC(gamma='scale')))
+
     # Perform leave-one-subject-out cross-validation for each subject
     # Delivers accuracy by subject, then by window size, then by session, then by model
     for subj in subjects:
         test_csvs = FILES_BY_SUBJECT[subj]
         train_csvs = [el for el in ALL_FILES if el not in test_csvs]
         train_data = file_utils.merge_all_dols([dataset[csv] for csv in train_csvs])
-        
+
         # Print subject name
         print(test_csvs[0].split('/')[1])
-        
+
         window_val_results = []
         window_test_results = []
         for window_s in window_lengths:
             train_psds, train_features, freqs = extract_features(train_data, window_s, shift, plot_psd, scale_by=scale_by)
             data = to_feature_vec(train_features, rest=False)
-            
+
             # X, Y for training
             # For testing: X_test, Y_test
             X = data[:, :-1]
@@ -339,5 +341,8 @@ if __name__ == "__main__":
             window_test_results.append([np.array(subj_test_results).mean(),stats.sem(np.array(subj_test_results))])
         all_val_results.append(window_val_results)
         all_test_results.append(window_test_results)
-        
+
     print(np.array(all_test_results).mean())
+
+    with open("/Users/hal/Desktop/model_lda.pkl", 'wb') as pickled_file:
+        pickle.dump(models['LDA'], pickled_file)
