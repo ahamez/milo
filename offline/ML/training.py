@@ -13,7 +13,6 @@ from sklearn.svm import SVC
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 # from sklearn.neighbors import KNeighborsClassifier
 # from sklearn.tree import DecisionTreeClassifier
-# from sklearn.linear_model import LogisticRegression
 # from sklearn.metrics import accuracy_score
 # from sklearn.metrics import classification_report
 # from sklearn import model_selection
@@ -33,7 +32,8 @@ import pickle
 
 import sys
 sys.path.append('../utils')
-from metadata import MARKER_DATA, LABELS, FILES_BY_SUBJECT, ALL_FILES, ELECTRODE_C3, ELECTRODE_C4
+# from metadata import MARKER_DATA, LABELS, FILES_BY_SUBJECT, ALL_FILES, ELECTRODE_C3, ELECTRODE_C4
+from metadata import LABELS, ALL_FILES, ELECTRODE_C3, ELECTRODE_C4
 import file_utils
 
 warnings.filterwarnings("ignore")
@@ -176,7 +176,6 @@ if __name__ == "__main__":
 
     # Load data
     dataset = file_utils.load_all()
-    subjects = [i for i in range(len(FILES_BY_SUBJECT))]             # index of the test files we want to use
 
     # Test options and evaluation metric
     scoring = 'accuracy'
@@ -184,57 +183,60 @@ if __name__ == "__main__":
     test = True
     seed = 7
     models = {}
-    # models.append(('LR', LogisticRegression(solver='lbfgs')))
     models['LDA'] = LinearDiscriminantAnalysis()
     # models.append(('KNN', KNeighborsClassifier()))
     # models.append(('CART', DecisionTreeClassifier()))
     # models.append(('NB', GaussianNB(var_smoothing=0.001)))
     # models.append(('SVM', SVC(gamma='scale')))
 
-    # Perform leave-one-subject-out cross-validation for each subject
-    # Delivers accuracy by subject, then by window size, then by session, then by model
-    for subj in subjects:
-        test_csvs = FILES_BY_SUBJECT[subj]
-        print(test_csvs)
-        train_csvs = test_csvs # [el for el in ALL_FILES if el not in test_csvs]
-        print(train_csvs)
-        train_data = file_utils.merge_all_dols([dataset[csv] for csv in train_csvs])
-        print(train_data)
+    test_csvs = ALL_FILES
+    print("test_csvs: ", test_csvs)
 
-        # Print subject name
-        print(test_csvs[0].split('/')[1])
+    # train_csvs = [el for el in ALL_FILES if el not in test_csvs]
+    train_csvs = test_csvs
+    print("train_csvs: ", train_csvs)
 
-        window_s = 2
-        train_psds, train_features, freqs = extract_features(train_data, window_s, shift, plot_psd, scale_by=scale_by)
-        data = to_feature_vec(train_features, rest=False)
+    train_data = file_utils.merge_all_dols([dataset[csv] for csv in train_csvs])
+    # print(train_data)
 
-        # X, Y for training
-        # For testing: X_test, Y_test
-        X = data[:, :-1]
-        Y = data[:, -1]
-        X, Y = shuffle(X, Y, random_state=seed)
+    # Print subject name
+    print(test_csvs[0].split('/')[1])
+
+    window_s = 2
+    # train_psds, train_features, freqs = extract_features(train_data, window_s, shift, plot_psd, scale_by=scale_by)
+    _, train_features, _ = extract_features(train_data, window_s, shift, plot_psd, scale_by=scale_by)
+    print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n\n\n")
+    data = to_feature_vec(train_features, rest=False)
+    print(data)
+    print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n\n\n")
+
+    # X, Y for training
+    # For testing: X_test, Y_test
+    X = data[:, :-1]
+    Y = data[:, -1]
+    X, Y = shuffle(X, Y, random_state=seed)
+
+    # if run_pca:
+    #     pca = PCA(n_components=2, svd_solver='full')
+    #     pca.fit(X)
+    #     X = pca.transform(X)
+
+    for csv in test_csvs:
+        test_data = dataset[csv]
+        _, test_features, _ = extract_features(test_data, window_s, shift, plot_psd, scale_by=scale_by)
+
+        if normalize_spectra:
+            normalize(test_features)
+
+        test_data = to_feature_vec(test_features)
+        X_test = test_data[:, :-1]
+        Y_test = test_data[:, -1]
 
         # if run_pca:
-        #     pca = PCA(n_components=2, svd_solver='full')
-        #     pca.fit(X)
-        #     X = pca.transform(X)
+        #     X_test = pca.transform(X_test)
 
-        for csv in test_csvs:
-            test_data = dataset[csv]
-            _, test_features, _ = extract_features(test_data, window_s, shift, plot_psd, scale_by=scale_by)
+        test_results = evaluate_models(X, Y, X_test, Y_test, models)
+        print("average accuracy: {:2.1f}".format(test_results.mean() * 100))
 
-            if normalize_spectra:
-                normalize(test_features)
-
-            test_data = to_feature_vec(test_features)
-            X_test = test_data[:, :-1]
-            Y_test = test_data[:, -1]
-
-            # if run_pca:
-            #     X_test = pca.transform(X_test)
-
-            test_results = evaluate_models(X, Y, X_test, Y_test, models)
-            print("average accuracy: {:2.1f}".format(test_results.mean() * 100))
-
-    with open("/Users/hal/Desktop/model_lda.pkl", 'wb') as pickled_file:
+    with open("./model_lda.pkl", 'wb') as pickled_file:
         pickle.dump(models['LDA'], pickled_file)
