@@ -50,7 +50,6 @@ def epoch_data(data, window_length, shift, maxlen=2500):
 
 
 def extract_features(all_data, window_s, shift, plot_psd=False, separate_trials=False, scale_by=None):
-    all_psds = {label: [] for label in LABELS}
     all_features = {label: [] for label in LABELS}
 
     idx = 1
@@ -59,29 +58,16 @@ def extract_features(all_data, window_s, shift, plot_psd=False, separate_trials=
             epochs = epoch_data(trial, int(250 * window_s), int(shift*250))    # shape n x 500 x 2
             trial_features = []
             for epoch in epochs:
-                features, freqs, psds_per_channel = get_features(epoch.T, scale_by=scale_by)
-                psd_c3, psd_c4 = psds_per_channel[0] , psds_per_channel[-1]
-                all_psds[direction].append([psd_c3, psd_c4])
+                features = get_features(epoch.T, scale_by=scale_by)
                 trial_features.append(features)
 
-                # Sanity check: plot the psd
-                if plot_psd:
-                    plt.figure("psd")
-                    plt.subplot(3, 2, idx)
-                    plt.plot(freqs, psd_c3)
-                    plt.ylim([0, 25])
-                    plt.xlim([6, 20])
-                    plt.subplot(3, 2, idx+1)
-                    plt.plot(freqs, psd_c4)
-                    plt.ylim([0, 25])
-                    plt.xlim([6, 20])
             if trial_features:
                 if separate_trials:
                     all_features[direction].append(np.array(trial_features))
                 else:
                     all_features[direction].extend(trial_features)
         idx += 2
-    return all_psds, all_features, freqs
+    return all_features
 
 
 def to_feature_vec(all_features, rest=False):
@@ -139,8 +125,6 @@ def get_features(arr, channels=[ELECTRODE_C3, ELECTRODE_C4], scale_by=None):
 
     Returns:
         features : array with feature values
-        freqs : array of frequencies in Hz
-        psds_per_channel : array with full psd spectrum, shape num_channels x num_freqs
     """
 
     psds_per_channel = []
@@ -163,7 +147,7 @@ def get_features(arr, channels=[ELECTRODE_C3, ELECTRODE_C4], scale_by=None):
         features = np.divide(features, scales)
     #features = np.array([features[:2].mean(), features[2:].mean()])
     # features = psds_per_channel[:,mu_indices].flatten()                     # all of 10-12hz as feature
-    return features, freqs, psds_per_channel
+    return features
 
 
 if __name__ == "__main__":
@@ -197,18 +181,13 @@ if __name__ == "__main__":
     print("train_csvs: ", train_csvs)
 
     train_data = file_utils.merge_all_dols([dataset[csv] for csv in train_csvs])
-    # print(train_data)
-
-    # Print subject name
-    print(test_csvs[0].split('/')[1])
 
     window_s = 2
-    # train_psds, train_features, freqs = extract_features(train_data, window_s, shift, plot_psd, scale_by=scale_by)
-    _, train_features, _ = extract_features(train_data, window_s, shift, plot_psd, scale_by=scale_by)
-    print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n\n\n")
+    # train_features freqs = extract_features(train_data, window_s, shift, plot_psd, scale_by=scale_by)
+    train_features = extract_features(train_data, window_s, shift, plot_psd, scale_by=scale_by)
+    print()
     data = to_feature_vec(train_features, rest=False)
-    print(data)
-    print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n\n\n")
+    print("<<<<<<<<<<<<<<\n", data, "\n<<<<<<<<<<<<<<\n")
 
     # X, Y for training
     # For testing: X_test, Y_test
@@ -223,7 +202,7 @@ if __name__ == "__main__":
 
     for csv in test_csvs:
         test_data = dataset[csv]
-        _, test_features, _ = extract_features(test_data, window_s, shift, plot_psd, scale_by=scale_by)
+        test_features = extract_features(test_data, window_s, shift, plot_psd, scale_by=scale_by)
 
         if normalize_spectra:
             normalize(test_features)

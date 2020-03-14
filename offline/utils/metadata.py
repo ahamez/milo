@@ -112,7 +112,7 @@ MARKER_DATA = {
                "time-test-JingMingImagined_10s-2019-3-20-10-28-35.csv": 'OpenBCI-RAW-2019-03-20_10-04-29.txt',
                }
 
-FILES_BY_SUBJECT = [
-             ["data/March20/time-test-JingMingImagined_10s-2019-3-20-10-28-35.csv",  # 009
-              ]             ]
-ALL_FILES = [name for sublist in FILES_BY_SUBJECT for name in sublist]
+ALL_FILES = [
+          "data/March20/time-test-JingMingImagined_10s-2019-3-20-10-28-35.csv",  # 009
+        ]
+# ALL_FILES = [name for sublist in FILES_BY_SUBJECT for name in sublist]
