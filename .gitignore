@@ -8,3 +8,4 @@ offline/data/March22_001/
 1to5_001_OpenBCI-RAW-2019-03-22_15-56-26.txt
 offline/data/March22_001/6to7_001_OpenBCI-RAW-2019-03-22_16-44-46.txt
 src/dashboard/data/
+*.pyc
