@@ -113,20 +113,20 @@ def get_features(arr, channels=[ELECTRODE_C3, ELECTRODE_C4], scale_by=None):
     if arr.shape[-1] < 500:
         nfft = 250
     for ch in arr[channels]:
-        #freqs,psd = signal.periodogram(np.squeeze(ch),fs=250, nfft=500, detrend='constant')
-        psd, freqs = mlab.psd(np.squeeze(ch),NFFT=nfft,Fs=250)
+        # freqs,psd = signal.periodogram(np.squeeze(ch),fs=250, nfft=500, detrend='constant')
+        psd, freqs = mlab.psd(np.squeeze(ch), NFFT=nfft, Fs=250)
         psds_per_channel.append(psd)
     psds_per_channel = np.array(psds_per_channel)
     mu_indices = np.where(np.logical_and(freqs >= 10, freqs <= 12))
 
-    #features = np.amax(psds_per_channel[:,mu_indices], axis=-1).flatten()   # max of 10-12hz as feature
+    # features = np.amax(psds_per_channel[:,mu_indices], axis=-1).flatten()   # max of 10-12hz as feature
     features = np.mean(psds_per_channel[:, mu_indices], axis=-1).flatten()   # mean of 10-12hz as feature
     if scale_by:
         scale_indices = np.where(np.logical_and(freqs >= scale_by[0], freqs <= scale_by[-1]))
         scales = np.mean(psds_per_channel[:,scale_indices],axis=-1).flatten()
         temp.append(scales)
         features = np.divide(features, scales)
-    #features = np.array([features[:2].mean(), features[2:].mean()])
+    # features = np.array([features[:2].mean(), features[2:].mean()])
     # features = psds_per_channel[:,mu_indices].flatten()                     # all of 10-12hz as feature
     return features
 
