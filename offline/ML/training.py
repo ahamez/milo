@@ -21,8 +21,7 @@ import pickle
 
 import sys
 sys.path.append('../utils')
-# from metadata import MARKER_DATA, LABELS, FILES_BY_SUBJECT, ALL_FILES, ELECTRODE_C3, ELECTRODE_C4
-from metadata import LABELS, ALL_FILES, ELECTRODE_C3, ELECTRODE_C4
+from metadata import LABELS, ELECTRODE_C3, ELECTRODE_C4
 import file_utils
 
 warnings.filterwarnings("ignore")
@@ -140,13 +139,19 @@ def get_features(arr, channels=[ELECTRODE_C3, ELECTRODE_C4], scale_by=None):
 
 
 if __name__ == "__main__":
+
+    ALL_FILES = {
+        "../data/March20/time-test-JingMingImagined_10s-2019-3-20-10-28-35.csv":
+        "../data/March20/OpenBCI-RAW-2019-03-20_10-04-29.txt",
+    }
+
     shift = 0.25
     normalize_spectra = True
     run_pca = False
     scale_by = None
 
     # Load data
-    dataset = file_utils.load_all()
+    dataset = file_utils.load_all(ALL_FILES)
 
     # Test options and evaluation metric
     test = True
@@ -158,8 +163,7 @@ if __name__ == "__main__":
     # models.append(('NB', GaussianNB(var_smoothing=0.001)))
     # models.append(('SVM', SVC(gamma='scale')))
 
-    test_csvs = ALL_FILES
-    print("test_csvs: ", test_csvs)
+    test_csvs = [csv for csv in ALL_FILES]
 
     # train_csvs = [el for el in ALL_FILES if el not in test_csvs]
     train_csvs = test_csvs

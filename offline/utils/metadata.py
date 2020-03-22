@@ -12,7 +12,7 @@ ELECTRODE_C4 = -1
 
 SAMPLING_FREQ = 250
 
-DATA_COLUMNS = (1, 2, 3, 4, 5, 6, 7, 8, 13)
+
 LABELS = ['Left', 'Right', 'Rest']
 
 # MARKER_DATA = {"4_RestLeftRight_MI_5s.csv": "4_RestLeftRight_5s_MI_OpenBCI-RAW-2019-03-17_16-32-53.txt",  # 005
@@ -108,11 +108,5 @@ LABELS = ['Left', 'Right', 'Rest']
 #               "data/March28_045/4_045_25rest_20left_20right_fourtimes_ML-2019-3-28-21-14-4.csv",
 #               ],
 #              ]
-MARKER_DATA = {
-               "time-test-JingMingImagined_10s-2019-3-20-10-28-35.csv": 'OpenBCI-RAW-2019-03-20_10-04-29.txt',
-               }
 
-ALL_FILES = [
-          "data/March20/time-test-JingMingImagined_10s-2019-3-20-10-28-35.csv",  # 009
-        ]
 # ALL_FILES = [name for sublist in FILES_BY_SUBJECT for name in sublist]
