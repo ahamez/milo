@@ -49,7 +49,7 @@ def epoch_data(data, window_length, shift, maxlen=2500):
     return np.array(arr)
 
 
-def extract_features(all_data, window_s, shift, plot_psd=False, separate_trials=False, scale_by=None):
+def extract_features(all_data, window_s, shift, separate_trials=False, scale_by=None):
     all_features = {label: [] for label in LABELS}
 
     idx = 1
@@ -152,8 +152,6 @@ def get_features(arr, channels=[ELECTRODE_C3, ELECTRODE_C4], scale_by=None):
 
 if __name__ == "__main__":
     shift = 0.25
-    plot_psd = True
-    tmin, tmax = 0, 0
     normalize_spectra = True
     run_pca = False
     scale_by = None
@@ -162,8 +160,6 @@ if __name__ == "__main__":
     dataset = file_utils.load_all()
 
     # Test options and evaluation metric
-    scoring = 'accuracy'
-    validation = True
     test = True
     seed = 7
     models = {}
@@ -183,9 +179,8 @@ if __name__ == "__main__":
     train_data = file_utils.merge_all_dols([dataset[csv] for csv in train_csvs])
 
     window_s = 2
-    # train_features freqs = extract_features(train_data, window_s, shift, plot_psd, scale_by=scale_by)
-    train_features = extract_features(train_data, window_s, shift, plot_psd, scale_by=scale_by)
     print()
+    train_features = extract_features(train_data, window_s, shift, scale_by=scale_by)
     data = to_feature_vec(train_features, rest=False)
     print("<<<<<<<<<<<<<<\n", data, "\n<<<<<<<<<<<<<<\n")
 
@@ -202,7 +197,7 @@ if __name__ == "__main__":
 
     for csv in test_csvs:
         test_data = dataset[csv]
-        test_features = extract_features(test_data, window_s, shift, plot_psd, scale_by=scale_by)
+        test_features = extract_features(test_data, window_s, shift, scale_by=scale_by)
 
         if normalize_spectra:
             normalize(test_features)
