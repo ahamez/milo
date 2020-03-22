@@ -1,27 +1,16 @@
+#!/usr/bin/env python3
+
 """
 Created on Sun Mar 17 09:03:30 2019
 @author: marley
 """
 
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import warnings
 from sklearn.utils import shuffle
-# from sklearn.preprocessing import RobustScaler
 from sklearn.svm import SVC
-# from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-# from sklearn.neighbors import KNeighborsClassifier
-# from sklearn.tree import DecisionTreeClassifier
-# from sklearn.metrics import accuracy_score
-# from sklearn.metrics import classification_report
-# from sklearn import model_selection
 from sklearn.preprocessing import scale
 from sklearn.decomposition import PCA
-# import seaborn as sn
-# from sklearn.utils.multiclass import unique_labels
-# from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import numpy.fft as fft
 import numpy as np
