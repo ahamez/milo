@@ -6,7 +6,6 @@ Created on Sun Mar 17 09:03:30 2019
 """
 
 import warnings
-from sklearn.utils import shuffle
 from sklearn.svm import SVC
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.preprocessing import scale
@@ -149,7 +148,6 @@ if __name__ == "__main__":
 
     # Test options and evaluation metric
     test = True
-    seed = 7
     model = LinearDiscriminantAnalysis()
 
     test_csvs = [csv for csv in ALL_FILES]
@@ -167,7 +165,6 @@ if __name__ == "__main__":
     # For testing: X_test, Y_test
     X = data[:, :-1]
     Y = data[:, -1]
-    X, Y = shuffle(X, Y, random_state=seed)
 
     # if run_pca:
     #     pca = PCA(n_components=2, svd_solver='full')
