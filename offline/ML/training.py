@@ -156,8 +156,8 @@ if __name__ == "__main__":
 
     train_data = file_utils.merge_all_dols([dataset[csv] for csv in train_csvs])
 
-    window_s = 2
-    train_features = extract_features(train_data, window_s, shift, scale_by=scale_by)
+    window_size = 2
+    train_features = extract_features(train_data, window_size, shift, scale_by=scale_by)
     data = to_feature_vec(train_features, rest=False)
 
     # X, Y for training
@@ -172,7 +172,7 @@ if __name__ == "__main__":
 
     for csv in test_csvs:
         test_data = dataset[csv]
-        test_features = extract_features(test_data, window_s, shift, scale_by=scale_by)
+        test_features = extract_features(test_data, window_size, shift, scale_by=scale_by)
 
         if normalize_spectra:
             normalize(test_features)
