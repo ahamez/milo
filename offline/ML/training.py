@@ -147,7 +147,6 @@ if __name__ == "__main__":
     dataset = file_utils.load_all(ALL_FILES)
 
     # Test options and evaluation metric
-    test = True
     model = LinearDiscriminantAnalysis()
 
     test_csvs = [csv for csv in ALL_FILES]
