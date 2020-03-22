@@ -158,10 +158,6 @@ if __name__ == "__main__":
     seed = 7
     models = {}
     models['LDA'] = LinearDiscriminantAnalysis()
-    # models.append(('KNN', KNeighborsClassifier()))
-    # models.append(('CART', DecisionTreeClassifier()))
-    # models.append(('NB', GaussianNB(var_smoothing=0.001)))
-    # models.append(('SVM', SVC(gamma='scale')))
 
     test_csvs = [csv for csv in ALL_FILES]
 
