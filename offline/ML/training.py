@@ -163,15 +163,12 @@ if __name__ == "__main__":
 
     # train_csvs = [el for el in ALL_FILES if el not in test_csvs]
     train_csvs = test_csvs
-    print("train_csvs: ", train_csvs)
 
     train_data = file_utils.merge_all_dols([dataset[csv] for csv in train_csvs])
 
     window_s = 2
-    print()
     train_features = extract_features(train_data, window_s, shift, scale_by=scale_by)
     data = to_feature_vec(train_features, rest=False)
-    print("<<<<<<<<<<<<<<\n", data, "\n<<<<<<<<<<<<<<\n")
 
     # X, Y for training
     # For testing: X_test, Y_test
