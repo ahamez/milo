@@ -83,8 +83,8 @@ def running_mean(x, N):
    return (cumsum[N:] - cumsum[:-N]) / N
 
 
-def evaluate_models(X, Y, X_test, Y_test, models):
-    """ Evaluate test accuracy of all models in a list of models
+def evaluate_model(X, Y, X_test, Y_test, model):
+    """ Evaluate test accuracy of model
 
     Args:
         X : array of features (train)
@@ -94,16 +94,10 @@ def evaluate_models(X, Y, X_test, Y_test, models):
         models : list of (name, model) tuples
 
     Returns:
-        val_results : array of accuracies, shape num_models
+        accuracy : model accuracy
     """
-    test_results = []
-    for name, model in models.items():
-        model.fit(X, Y)
-        score = model.score(X_test, Y_test)
-        test_results.append(score)
-        msg = "%s: %f" % (name, score)
-        print(msg)
-    return np.array(test_results)
+    model.fit(X, Y)
+    return model.score(X_test, Y_test)
 
 def get_features(arr, channels=[ELECTRODE_C3, ELECTRODE_C4], scale_by=None):
     """ Get features from single window of EEG data
@@ -156,8 +150,7 @@ if __name__ == "__main__":
     # Test options and evaluation metric
     test = True
     seed = 7
-    models = {}
-    models['LDA'] = LinearDiscriminantAnalysis()
+    model = LinearDiscriminantAnalysis()
 
     test_csvs = [csv for csv in ALL_FILES]
 
@@ -195,8 +188,8 @@ if __name__ == "__main__":
         # if run_pca:
         #     X_test = pca.transform(X_test)
 
-        test_results = evaluate_models(X, Y, X_test, Y_test, models)
-        print("average accuracy: {:2.1f}".format(test_results.mean() * 100))
+        accuracy = evaluate_model(X, Y, X_test, Y_test, model)
+        print("average accuracy: {:2.1f}".format(accuracy * 100))
 
     with open("./model_lda.pkl", 'wb') as pickled_file:
-        pickle.dump(models['LDA'], pickled_file)
+        pickle.dump(model, pickled_file)
